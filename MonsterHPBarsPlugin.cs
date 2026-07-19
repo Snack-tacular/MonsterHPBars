@@ -16,7 +16,11 @@ namespace MonsterHPBars
         public static MonsterHPBarsPlugin Instance { get; private set; } = null!;
         internal static ManualLogSource Log { get; private set; } = null!;
 
+        // Toggle state
+        public static bool IsModEnabled { get; private set; } = true;
+
         // Config entries
+        public static ConfigEntry<KeyboardShortcut> ToggleKey { get; private set; } = null!;
         public static ConfigEntry<bool>  ShowOnlyEnemies   { get; private set; } = null!;
         public static ConfigEntry<bool>  ShowBossOnly       { get; private set; } = null!;
         public static ConfigEntry<float> BarWidth           { get; private set; } = null!;
@@ -47,7 +51,48 @@ namespace MonsterHPBars
             _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             _harmony.PatchAll(typeof(UnitPatches));
 
-            Log.LogInfo("Monster HP Bars loaded successfully!");
+            Log.LogInfo("Monster HP Bars loaded successfully! Press F4 to toggle.");
+        }
+
+        private void Update()
+        {
+            if (ToggleKey.Value.IsDown())
+            {
+                ToggleMod();
+            }
+        }
+
+        private void ToggleMod()
+        {
+            IsModEnabled = !IsModEnabled;
+            Log.LogInfo($"Monster HP Bars toggled {(IsModEnabled ? "ON" : "OFF")}");
+
+            if (!IsModEnabled)
+            {
+                // Destroy all active HP bar components immediately
+                var activeBars = FindObjectsByType<HPBarComponent>(FindObjectsInactive.Exclude);
+                foreach (var bar in activeBars)
+                {
+                    if (bar != null)
+                    {
+                        Destroy(bar); // OnDestroy on the component will handle canvas deletion
+                    }
+                }
+            }
+            else
+            {
+                // Re-add HP bars to all active units
+                if (UnitManager.I != null && UnitManager.I.ActiveUnits != null)
+                {
+                    foreach (var unit in UnitManager.I.ActiveUnits)
+                    {
+                        if (unit != null)
+                        {
+                            UnitPatches.TryAddHPBar(unit);
+                        }
+                    }
+                }
+            }
         }
 
         private void BindConfig()
@@ -56,6 +101,7 @@ namespace MonsterHPBars
             const string sAppearance = "2 - Appearance";
             const string sColors     = "3 - Colors";
 
+            ToggleKey         = Config.Bind(sGeneral, "ToggleKey",         new KeyboardShortcut(KeyCode.F4), "Key to toggle the mod on/off.");
             ShowOnlyEnemies   = Config.Bind(sGeneral, "ShowOnlyEnemies",   true,  "Only show HP bars on enemy (Neutral team) units.");
             ShowBossOnly      = Config.Bind(sGeneral, "ShowBossOnly",       false, "Only show HP bars on boss units.");
             AlwaysVisible     = Config.Bind(sGeneral, "AlwaysVisible",      true,  "Always show bars, even when unit is at full health.");

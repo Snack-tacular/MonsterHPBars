@@ -82,6 +82,9 @@ namespace MonsterHPBars
             {
                 if (unit == null) return;
 
+                // Mod status check
+                if (!MonsterHPBarsPlugin.IsModEnabled) return;
+
                 // Filter out players immediately
                 if (unit.isPlayerCharacter) return;
 
@@ -116,6 +119,9 @@ namespace MonsterHPBars
             yield return null;
 
             if (unit == null) yield break;
+
+            // Mod status check
+            if (!MonsterHPBarsPlugin.IsModEnabled) yield break;
 
             var existing = unit.GetComponent<HPBarComponent>();
             if (existing != null) yield break;
