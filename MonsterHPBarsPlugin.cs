@@ -66,33 +66,6 @@ namespace MonsterHPBars
         {
             IsModEnabled = !IsModEnabled;
             Log.LogInfo($"Monster HP Bars toggled {(IsModEnabled ? "ON" : "OFF")}");
-
-            if (!IsModEnabled)
-            {
-                // Destroy all active HP bar components immediately
-                var activeBars = FindObjectsByType<HPBarComponent>(FindObjectsInactive.Exclude);
-                foreach (var bar in activeBars)
-                {
-                    if (bar != null)
-                    {
-                        Destroy(bar); // OnDestroy on the component will handle canvas deletion
-                    }
-                }
-            }
-            else
-            {
-                // Re-add HP bars to all active units
-                if (UnitManager.I != null && UnitManager.I.ActiveUnits != null)
-                {
-                    foreach (var unit in UnitManager.I.ActiveUnits)
-                    {
-                        if (unit != null)
-                        {
-                            UnitPatches.TryAddHPBar(unit);
-                        }
-                    }
-                }
-            }
         }
 
         private void BindConfig()

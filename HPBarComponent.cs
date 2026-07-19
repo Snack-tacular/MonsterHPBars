@@ -235,7 +235,6 @@ namespace MonsterHPBars
             }
 
             // 2. Fallback: Try SkinnedMeshRenderers (the main body of animated monsters)
-            // Note: GetComponentsInChildren causes GC allocation, so we limit attempts to prevent lag
             var renderers = unit.GetComponentsInChildren<Renderer>(true);
             if (renderers != null && renderers.Length > 0)
             {
@@ -347,19 +346,22 @@ namespace MonsterHPBars
             }
 
             // ─ Filter checks ──────────────────────────────────────────────────
-            bool shouldShow = true;
+            bool shouldShow = MonsterHPBarsPlugin.IsModEnabled;
             
-            if (_damageable.Owner.isPlayerCharacter)
+            if (shouldShow)
             {
-                shouldShow = false;
-            }
-            else if (MonsterHPBarsPlugin.ShowBossOnly.Value && !_damageable.Owner.isBoss)
-            {
-                shouldShow = false;
-            }
-            else if (MonsterHPBarsPlugin.ShowOnlyEnemies.Value && _damageable.Owner.Team != PlayerTeam.Neutral)
-            {
-                shouldShow = false;
+                if (_damageable.Owner.isPlayerCharacter)
+                {
+                    shouldShow = false;
+                }
+                else if (MonsterHPBarsPlugin.ShowBossOnly.Value && !_damageable.Owner.isBoss)
+                {
+                    shouldShow = false;
+                }
+                else if (MonsterHPBarsPlugin.ShowOnlyEnemies.Value && _damageable.Owner.Team != PlayerTeam.Neutral)
+                {
+                    shouldShow = false;
+                }
             }
             
             _canvas.gameObject.SetActive(shouldShow);

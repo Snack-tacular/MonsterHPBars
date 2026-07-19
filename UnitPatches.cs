@@ -82,9 +82,6 @@ namespace MonsterHPBars
             {
                 if (unit == null) return;
 
-                // Mod status check
-                if (!MonsterHPBarsPlugin.IsModEnabled) return;
-
                 // Filter out players immediately
                 if (unit.isPlayerCharacter) return;
 
@@ -93,7 +90,7 @@ namespace MonsterHPBars
                 if (existing != null) return;
 
                 // If Damageable is not initialized yet (common in pooled objects), 
-                // defer initialization by 3 frames instead of running a global periodic scan.
+                // defer initialization by 3 frames.
                 if (unit.Damageable == null)
                 {
                     if (MonsterHPBarsPlugin.Instance != null)
@@ -119,9 +116,6 @@ namespace MonsterHPBars
             yield return null;
 
             if (unit == null) yield break;
-
-            // Mod status check
-            if (!MonsterHPBarsPlugin.IsModEnabled) yield break;
 
             var existing = unit.GetComponent<HPBarComponent>();
             if (existing != null) yield break;
