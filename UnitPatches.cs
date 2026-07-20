@@ -1,4 +1,3 @@
-using System.Collections;
 using HarmonyLib;
 using UnityEngine;
 
@@ -89,49 +88,15 @@ namespace MonsterHPBars
                 var existing = unit.GetComponent<HPBarComponent>();
                 if (existing != null) return;
 
-                // If Damageable is not initialized yet (common in pooled objects), 
-                // defer initialization by 3 frames.
-                if (unit.Damageable == null)
-                {
-                    if (MonsterHPBarsPlugin.Instance != null)
-                    {
-                        MonsterHPBarsPlugin.Instance.StartCoroutine(DeferredAddHPBar(unit));
-                    }
-                    return;
-                }
-
-                AddHPBarComponent(unit, unit.Damageable);
+                // Add component immediately. It will lazily resolve unit.Damageable 
+                // inside its Update loop, eliminating all coroutine scheduling and race conditions.
+                var comp = unit.gameObject.AddComponent<HPBarComponent>();
+                comp.Init(unit.UnitName, unit.isBoss, unit.isEliteUnit);
             }
             catch (System.Exception ex)
             {
                 MonsterHPBarsPlugin.Log.LogWarning($"HP bar creation failed: {ex.Message}");
             }
-        }
-
-        private static IEnumerator DeferredAddHPBar(Unit unit)
-        {
-            // Wait for 3 frames to allow object pool component setup to complete
-            yield return null;
-            yield return null;
-            yield return null;
-
-            if (unit == null) yield break;
-
-            var existing = unit.GetComponent<HPBarComponent>();
-            if (existing != null) yield break;
-
-            IDamageable? dmg = unit.Damageable;
-            if (dmg != null)
-            {
-                AddHPBarComponent(unit, dmg);
-            }
-        }
-
-        private static void AddHPBarComponent(Unit unit, IDamageable dmg)
-        {
-            var comp = unit.gameObject.AddComponent<HPBarComponent>();
-            comp.Init(dmg, unit.UnitName, unit.isBoss, unit.isEliteUnit);
-            MonsterHPBarsPlugin.Log.LogDebug($"HP bar component attached to '{unit.UnitName}'");
         }
 
         private static void RemoveBar(Unit unit)

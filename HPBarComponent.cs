@@ -36,24 +36,26 @@ namespace MonsterHPBars
         private float _cachedHeight   = -1f;
         private int   _heightCalculationsCount = 0;
 
-        // ─── player transform caching ─────────────────────────────────────────
+        // ─── static caching for player & camera to prevent search spams ──────
         private static Transform? _localPlayerTransform;
+        private static int        _lastPlayerSearchFrame = -1;
+        private static Camera?    _cachedMainCamera;
+        private static int        _lastCameraSearchFrame = -1;
 
         // ─── optimization caches ──────────────────────────────────────────────
         private float _lastSetHeight   = -99f;
         private float _lastSetPadding  = -99f;
         private float _lastFillAmount  = -99f;
         private float _lastDelayedFill = -99f;
+        private float _sqrShowRadius   = 1600f; // 40^2 default
 
         // ─── constants ────────────────────────────────────────────────────────
         private const float DelayedFillSpeed = 0.8f;   // how fast ghost bar drains
         private const float DelayedFillDelay = 0.3f;   // seconds before ghost starts moving
 
         // ─────────────────────────────────────────────────────────────────────
-        public void Init(IDamageable damageable, string unitName, bool isBoss, bool isElite)
+        public void Init(string unitName, bool isBoss, bool isElite)
         {
-            _damageable = damageable;
-            
             // Clean up name: remove "boss_" prefix and format nicely (e.g. "boss_goose" -> "Goose")
             if (!string.IsNullOrEmpty(unitName))
             {
@@ -81,18 +83,24 @@ namespace MonsterHPBars
             _lastSetPadding = -99f;
             _lastFillAmount = -99f;
             _lastDelayedFill = -99f;
+            _damageable = null;
         }
 
         private void Start()
         {
             BuildUI();
+            
+            // Cache squared radius to avoid multiplications inside Update()
+            float maxRadius = MonsterHPBarsPlugin.ShowRadius.Value;
+            _sqrShowRadius = maxRadius * maxRadius;
+
             _initialized = true;
             _delayedFill = 1f;
         }
 
         private void BuildUI()
         {
-            _cam = Camera.main;
+            _cam = GetMainCamera();
 
             // Destroy any pre-existing orphan HPBarCanvas child to prevent duplicates/leaks
             var oldCanvas = transform.Find("HPBarCanvas");
@@ -325,6 +333,13 @@ namespace MonsterHPBars
         {
             if (_localPlayerTransform != null) return _localPlayerTransform;
 
+            // Only scan once per frame across all health bar components if player is null
+            if (Time.frameCount == _lastPlayerSearchFrame)
+            {
+                return null;
+            }
+            _lastPlayerSearchFrame = Time.frameCount;
+
             if (UnitManager.I != null && UnitManager.I.ActiveUnits != null)
             {
                 foreach (var unit in UnitManager.I.ActiveUnits)
@@ -339,9 +354,38 @@ namespace MonsterHPBars
             return _localPlayerTransform;
         }
 
+        private static Camera? GetMainCamera()
+        {
+            if (_cachedMainCamera != null && _cachedMainCamera.gameObject.activeInHierarchy)
+            {
+                return _cachedMainCamera;
+            }
+
+            // Only scan once per frame across all components if camera is null
+            if (Time.frameCount == _lastCameraSearchFrame)
+            {
+                return _cachedMainCamera;
+            }
+            _lastCameraSearchFrame = Time.frameCount;
+
+            _cachedMainCamera = Camera.main;
+            return _cachedMainCamera;
+        }
+
         private void Update()
         {
-            if (!_initialized || _canvas == null || _damageable == null) return;
+            // Dynamically resolve the Damageable owner if it wasn't initialized yet
+            if (_damageable == null)
+            {
+                var unitComponent = GetComponent<Unit>();
+                if (unitComponent != null)
+                {
+                    _damageable = unitComponent.Damageable;
+                }
+                if (_damageable == null) return; // Try again next frame
+            }
+
+            if (!_initialized || _canvas == null) return;
 
             // Destroy self immediately if the unit died or is despawning
             if (_damageable.Owner == null || 
@@ -372,13 +416,12 @@ namespace MonsterHPBars
                 }
                 else
                 {
-                    // Distance check (using square magnitude to avoid expensive square root CPU cost)
+                    // Distance check (highly optimized square magnitude check)
                     var playerTx = GetLocalPlayerTransform();
                     if (playerTx != null)
                     {
-                        float maxRadius = MonsterHPBarsPlugin.ShowRadius.Value;
                         float distSq = (playerTx.position - transform.position).sqrMagnitude;
-                        if (distSq > (maxRadius * maxRadius))
+                        if (distSq > _sqrShowRadius)
                         {
                             shouldShow = false;
                         }
@@ -404,7 +447,7 @@ namespace MonsterHPBars
             }
 
             // ─ Camera billboard (caching main camera to prevent tag search) ───
-            if (_cam == null || !_cam.gameObject.activeInHierarchy) _cam = Camera.main;
+            if (_cam == null || !_cam.gameObject.activeInHierarchy) _cam = GetMainCamera();
             if (_cam != null && _canvasRT != null)
                 _canvasRT.rotation = Quaternion.LookRotation(_canvasRT.position - _cam.transform.position);
 
