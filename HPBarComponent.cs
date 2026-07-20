@@ -36,6 +36,9 @@ namespace MonsterHPBars
         private float _cachedHeight   = -1f;
         private int   _heightCalculationsCount = 0;
 
+        // ─── player transform caching ─────────────────────────────────────────
+        private static Transform? _localPlayerTransform;
+
         // ─── optimization caches ──────────────────────────────────────────────
         private float _lastSetHeight   = -99f;
         private float _lastSetPadding  = -99f;
@@ -318,6 +321,24 @@ namespace MonsterHPBars
             return 2.0f; // Standard default height fallback
         }
 
+        private static Transform? GetLocalPlayerTransform()
+        {
+            if (_localPlayerTransform != null) return _localPlayerTransform;
+
+            if (UnitManager.I != null && UnitManager.I.ActiveUnits != null)
+            {
+                foreach (var unit in UnitManager.I.ActiveUnits)
+                {
+                    if (unit != null && unit.isPlayerCharacter)
+                    {
+                        _localPlayerTransform = unit.transform;
+                        break;
+                    }
+                }
+            }
+            return _localPlayerTransform;
+        }
+
         private void Update()
         {
             if (!_initialized || _canvas == null || _damageable == null) return;
@@ -348,6 +369,20 @@ namespace MonsterHPBars
                 else if (MonsterHPBarsPlugin.ShowOnlyEnemies.Value && _damageable.Owner.Team != PlayerTeam.Neutral)
                 {
                     shouldShow = false;
+                }
+                else
+                {
+                    // Distance check (using square magnitude to avoid expensive square root CPU cost)
+                    var playerTx = GetLocalPlayerTransform();
+                    if (playerTx != null)
+                    {
+                        float maxRadius = MonsterHPBarsPlugin.ShowRadius.Value;
+                        float distSq = (playerTx.position - transform.position).sqrMagnitude;
+                        if (distSq > (maxRadius * maxRadius))
+                        {
+                            shouldShow = false;
+                        }
+                    }
                 }
             }
             

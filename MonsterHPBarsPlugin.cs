@@ -23,6 +23,7 @@ namespace MonsterHPBars
         public static ConfigEntry<KeyboardShortcut> ToggleKey { get; private set; } = null!;
         public static ConfigEntry<bool>  ShowOnlyEnemies   { get; private set; } = null!;
         public static ConfigEntry<bool>  ShowBossOnly       { get; private set; } = null!;
+        public static ConfigEntry<float> ShowRadius         { get; private set; } = null!;
         public static ConfigEntry<float> BarWidth           { get; private set; } = null!;
         public static ConfigEntry<float> BarHeight          { get; private set; } = null!;
         public static ConfigEntry<float> BarHeightPadding   { get; private set; } = null!;
@@ -75,6 +76,7 @@ namespace MonsterHPBars
             ToggleKey         = Config.Bind(sGeneral, "ToggleKey",         new KeyboardShortcut(KeyCode.F4), "Key to toggle the mod on/off.");
             ShowOnlyEnemies   = Config.Bind(sGeneral, "ShowOnlyEnemies",   true,  "Only show HP bars on enemy (Neutral team) units.");
             ShowBossOnly      = Config.Bind(sGeneral, "ShowBossOnly",       false, "Only show HP bars on boss units.");
+            ShowRadius        = Config.Bind(sGeneral, "ShowRadius",         40f,   "Only show HP bars within this distance (in units) from the player.");
             AlwaysVisible     = Config.Bind(sGeneral, "AlwaysVisible",      true,  "Always show bars, even when unit is at full health.");
             VisibilityDuration= Config.Bind(sGeneral, "VisibilityDuration", 5f,    "Seconds the bar stays visible after damage (when AlwaysVisible is false).");
 
