@@ -9,7 +9,6 @@ A client-side BepInEx mod for **Sineus Arena** that adds dynamic, world-space ov
 ## Features
 
 - **World-Space Billboards**: UI health bars float cleanly above each monster and dynamically face the main camera.
-- **Dynamic Above-Head Positioning**: Automatically calculates the exact physical top bounds of each monster (using developer cylinder definitions and skinned mesh renderers). Works perfectly for short slimes, regular monsters, and giant bosses without floating too high or clipping inside heads.
 - **Ghost Health Bar Animation**: A yellow "ghost" bar drains behind the real health bar after taking damage, giving it a classic arcade/RPG feel.
 - **Color-Coded Health Thresholds**: Smoothly lerps between customizable colors as health drops (🟢 Green/Healthy → 🟡 Yellow/Damaged → 🔴 Red/Critical).
 - **Elite & Boss Accents**: Features distinct colored borders (Purple for Elites, Orange for Bosses).
