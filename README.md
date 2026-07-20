@@ -1,5 +1,7 @@
 # Sineus Arena - Monster HP Bars Mod
 
+![Preview](assets/preview.png)
+
 A premium quality, client-side BepInEx mod for **Sineus Arena** that adds dynamic, world-space overhead health bars to monsters.
 
 ---
