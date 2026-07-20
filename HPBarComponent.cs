@@ -25,7 +25,6 @@ namespace MonsterHPBars
         private RectTransform? _fillRT;
         private Image?         _delayedFillImage;
         private RectTransform? _delayedFillRT;
-        private Text?          _hpText;
         private Text?          _nameText;
         private Image?         _eliteBorder;
 
@@ -42,8 +41,6 @@ namespace MonsterHPBars
         private float _lastSetPadding  = -99f;
         private float _lastFillAmount  = -99f;
         private float _lastDelayedFill = -99f;
-        private int   _lastHpValue     = -1;
-        private int   _lastMaxHpValue  = -1;
 
         // ─── constants ────────────────────────────────────────────────────────
         private const float DelayedFillSpeed = 0.8f;   // how fast ghost bar drains
@@ -81,8 +78,6 @@ namespace MonsterHPBars
             _lastSetPadding = -99f;
             _lastFillAmount = -99f;
             _lastDelayedFill = -99f;
-            _lastHpValue = -1;
-            _lastMaxHpValue = -1;
         }
 
         private void Start()
@@ -190,14 +185,6 @@ namespace MonsterHPBars
                 bRT.sizeDelta = new Vector2(w + 8f, h + 8f);
                 // Push behind bg
                 borderGo.transform.SetSiblingIndex(0);
-            }
-
-            // ─ HP numbers ─────────────────────────────────────────────────────
-            if (MonsterHPBarsPlugin.ShowNumbers.Value)
-            {
-                _hpText = CreateText(canvasGo, "HPText", "", 11,
-                    new Vector2(0f, 0f), new Vector2(w, h), TextAnchor.MiddleCenter);
-                _hpText.color = new Color(1f, 1f, 1f, 0.95f);
             }
         }
 
@@ -412,11 +399,14 @@ namespace MonsterHPBars
                 _lastDelayedFill = _delayedFill;
             }
 
-            // ─ Real fill ──────────────────────────────────────────────────────
-            if (_fillRT != null && _fillImage != null && Mathf.Abs(fill - _lastFillAmount) > 0.001f)
+            // ─ Real fill & Color-coding (lerp outside sizeDelta change checks) ─
+            if (_fillRT != null && _fillImage != null)
             {
-                _fillRT.sizeDelta = new Vector2(w * fill, h);
-                _lastFillAmount = fill;
+                if (Mathf.Abs(fill - _lastFillAmount) > 0.001f)
+                {
+                    _fillRT.sizeDelta = new Vector2(w * fill, h);
+                    _lastFillAmount = fill;
+                }
 
                 // Lerp color based on thresholds
                 Color targetColor;
@@ -428,16 +418,6 @@ namespace MonsterHPBars
                     targetColor = MonsterHPBarsPlugin.HealthyColor.Value;
 
                 _fillImage.color = Color.Lerp(_fillImage.color, targetColor, Time.deltaTime * 8f);
-            }
-
-            // ─ HP numbers (optimized string format lookup) ───────────────────
-            int curInt = Mathf.RoundToInt(currentHp);
-            int maxInt = Mathf.RoundToInt(maxHp);
-            if (_hpText != null && (curInt != _lastHpValue || maxInt != _lastMaxHpValue))
-            {
-                _hpText.text = $"{curInt} / {maxInt}";
-                _lastHpValue = curInt;
-                _lastMaxHpValue = maxInt;
             }
 
             // ─ Visibility timeout ─────────────────────────────────────────────

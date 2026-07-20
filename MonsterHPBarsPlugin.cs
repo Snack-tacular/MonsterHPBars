@@ -26,9 +26,7 @@ namespace MonsterHPBars
         public static ConfigEntry<float> BarWidth           { get; private set; } = null!;
         public static ConfigEntry<float> BarHeight          { get; private set; } = null!;
         public static ConfigEntry<float> BarHeightPadding   { get; private set; } = null!;
-        public static ConfigEntry<float> FadeDistance       { get; private set; } = null!;
         public static ConfigEntry<bool>  ShowLabel          { get; private set; } = null!;
-        public static ConfigEntry<bool>  ShowNumbers        { get; private set; } = null!;
         public static ConfigEntry<Color> HealthyColor       { get; private set; } = null!;
         public static ConfigEntry<Color> DamagedColor       { get; private set; } = null!;
         public static ConfigEntry<Color> CriticalColor      { get; private set; } = null!;
@@ -79,13 +77,11 @@ namespace MonsterHPBars
             ShowBossOnly      = Config.Bind(sGeneral, "ShowBossOnly",       false, "Only show HP bars on boss units.");
             AlwaysVisible     = Config.Bind(sGeneral, "AlwaysVisible",      true,  "Always show bars, even when unit is at full health.");
             VisibilityDuration= Config.Bind(sGeneral, "VisibilityDuration", 5f,    "Seconds the bar stays visible after damage (when AlwaysVisible is false).");
-            FadeDistance      = Config.Bind(sGeneral, "FadeDistance",       60f,   "Maximum screen-space distance (in pixels) from the unit before the bar is hidden.");
 
             BarWidth          = Config.Bind(sAppearance, "BarWidth",         120f,  "Width of the HP bar in pixels.");
             BarHeight         = Config.Bind(sAppearance, "BarHeight",        10f,   "Height of the HP bar in pixels.");
             BarHeightPadding  = Config.Bind(sAppearance, "BarHeightPadding_v3", 1.5f,  "Additional vertical padding above the unit's head.");
             ShowLabel         = Config.Bind(sAppearance, "ShowLabel",        true,  "Show unit name label above the bar.");
-            ShowNumbers       = Config.Bind(sAppearance, "ShowNumbers",      true,  "Show current/max HP numbers inside the bar.");
 
             HealthyColor      = Config.Bind(sColors, "HealthyColor",   new Color(0.15f, 0.85f, 0.25f, 0.90f), "Bar color at high HP.");
             DamagedColor      = Config.Bind(sColors, "DamagedColor",  new Color(0.95f, 0.75f, 0.10f, 0.90f), "Bar color at medium HP.");
