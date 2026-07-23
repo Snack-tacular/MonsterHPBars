@@ -9,6 +9,9 @@
     <LangVersion>latest</LangVersion>
     <Optimize>true</Optimize>
     <Deterministic>true</Deterministic>
+    <Version>1.0.6</Version>
+    <AssemblyVersion>1.0.6</AssemblyVersion>
+    <FileVersion>1.0.6</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
