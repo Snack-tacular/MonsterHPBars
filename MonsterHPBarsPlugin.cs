@@ -27,6 +27,7 @@ namespace MonsterHPBars
         public static ConfigEntry<float> BarWidth           { get; private set; } = null!;
         public static ConfigEntry<float> BarHeight          { get; private set; } = null!;
         public static ConfigEntry<float> BarHeightPadding   { get; private set; } = null!;
+        public static ConfigEntry<float> BossHeightPadding   { get; private set; } = null!;
         public static ConfigEntry<bool>  ShowLabel          { get; private set; } = null!;
         public static ConfigEntry<Color> HealthyColor       { get; private set; } = null!;
         public static ConfigEntry<Color> DamagedColor       { get; private set; } = null!;
@@ -83,6 +84,7 @@ namespace MonsterHPBars
             BarWidth          = Config.Bind(sAppearance, "BarWidth",         120f,  "Width of the HP bar in pixels.");
             BarHeight         = Config.Bind(sAppearance, "BarHeight",        10f,   "Height of the HP bar in pixels.");
             BarHeightPadding  = Config.Bind(sAppearance, "BarHeightPadding_v3", 1.5f,  "Additional vertical padding above the unit's head.");
+            BossHeightPadding = Config.Bind(sAppearance, "BossHeightPadding", 0.5f,  "Extra vertical padding added *only* to boss health bars.");
             ShowLabel         = Config.Bind(sAppearance, "ShowLabel",        true,  "Show unit name label above the bar.");
 
             HealthyColor      = Config.Bind(sColors, "HealthyColor",   new Color(0.15f, 0.85f, 0.25f, 0.90f), "Bar color at high HP.");

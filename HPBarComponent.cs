@@ -437,6 +437,10 @@ namespace MonsterHPBars
             {
                 float height = GetOrCalculateHeight();
                 float padding = MonsterHPBarsPlugin.BarHeightPadding.Value;
+                if (_isBoss)
+                {
+                    padding += MonsterHPBarsPlugin.BossHeightPadding.Value;
+                }
                 
                 if (Mathf.Abs(height - _lastSetHeight) > 0.01f || Mathf.Abs(padding - _lastSetPadding) > 0.01f)
                 {
